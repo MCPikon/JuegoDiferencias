@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+
+<div style="text-align: center; margin: 20px;">
+    <span id="titulo">Haz click en las tres diferencias de la imagen de la derecha, antes de que la cuenta atrás finalice</span>
+</div>
+
+<canvas id="canvas"></canvas>
+<div style="font-size: 2em;">Cuenta Atrás: <span id="contador"></span> segundos</div>
+<div id="info"></div>
+
+<img src="./imagenes/original_1.jpg" style="visibility: hidden;">
+<img src="./imagenes/diferencias_1.jpg" style="visibility: hidden;">
+
+<script type="text/javascript" src="js/jquery-3.6.0.min.js"></script>
+<script type="text/javascript">
+    var cuenta_atras = 120;
+    var tiempo_agotado = false;
+    var canvas = document.getElementById("canvas");
+    var ctx = canvas.getContext("2d");
+
+    var cont = 0;
+    var dif_1 = false;
+    var dif_2 = false;
+    var dif_3 = false;
+    var msg_reto = false;
+
+    //probando el canvas:
+    canvas.width = 800;
+    canvas.height = 400;
+
+    ctx.strokeStyle = "red";
+    ctx.moveTo(50,50);
+    ctx.lineTo(200,100);
+    ctx.lineTo(300,100);
+    ctx.stroke();
+    
+    ctx.font = "30px Arial";
+    ctx.strokeText("Hola Jugador", 100,50);
+
+    //preparar las imagenes a pintar en el canvas
+    var original = new Image();
+    original.src = "./imagenes/original_1.jpg";
+    var diferencias = new Image();
+    diferencias.src = "./imagenes/diferencias_1.jpg";
+    var diferencias_2 = new Image();
+    diferencias_2.src = "./imagenes/diferencias_2.jpg";
+    
+    //clic del raton sobre el canvas:
+    $("#canvas").click(function(e){
+        if(tiempo_agotado) {
+            alert("se te ha agotado el tiempo!");
+            return; //esto hace que la funcion finalize
+        }
+
+        var posCanvasX = $(this).position().left;
+        var posCanvasY = $(this).position().top;
+    	var x = e.pageX - posCanvasX;
+        var y = e.pageY - posCanvasY;
+        //le aplico un offset para mantener las coordenadas antiguas
+        //SOLO PARA QUE FUNCIONEN ANTIGUAS COORDENADAS, NUEVAS COORDENADAS NO VALDRÍAN PARA ESTE offset
+        x += 8;
+        y += 58;
+
+        var texto = "clic en x: " + x + " y: " + y;
+        $("#info").html(texto);
+
+        diferenciasIniciales(x, y);
+
+        if(cont == 3) {
+            if(msg_reto == false) {
+                alert("has ganado, ahora te voy a poner un reto más dificil");
+                $("#titulo").html("Haz click en la diferencia de la imagen de la derecha")
+                msg_reto = true;
+            }
+            diferenciaFinal(x, y);
+        }
+
+    });
+
+    function diferenciasIniciales(x, y) {
+        if((x>= 698 && x<= 743 && y>= 190 && y<= 271) && dif_1 == false) {
+            alertaDiferencias();
+            dif_1 = true;
+        }
+
+        if((x>= 745 && x<= 786 && y>= 276 && y<= 330) && dif_2 == false) {
+            alertaDiferencias();
+            dif_2 = true;
+        }
+
+        if((x>= 666 && x<= 696 && y>= 58 && y<= 102) && dif_3 == false) {
+            alertaDiferencias();
+            dif_3 = true;
+        }
+    }
+
+    function alertaDiferencias() {
+        cont++;
+        if(cont == 1) {
+            alert("Felicidades adivinaste la diferencia, llevas " + cont + " diferencia");
+        }else {
+            alert("Felicidades adivinaste la diferencia, llevas " + cont + " diferencias");
+        }
+    }
+
+    function diferenciaFinal(x, y) {
+        ctx.drawImage(diferencias_2,400,0,400,400);
+        if(x>= 541 && x<= 576 && y>= 298 && y<= 313) {
+            clearTimeout(timer);
+            alert("Enhorabuena! Has completado el juego");
+            var segundos = $("#contador").html();
+            if(segundos > 0) {
+                alert("Te han sobrado " + segundos + " segundos");
+            }
+            location.reload();
+        }
+    }
+
+    //Una vez la pagina haya terminado de cargar todo, imagenes incluidas
+    //ejecutamos el siguiente codigo
+    $(document).ready(function() {
+        ctx.drawImage(original,0,0,400,400);
+        ctx.drawImage(diferencias,400,0,400,400);
+        $("#contador").html(cuenta_atras);
+    });
+
+    function decrementar_cuenta() {
+        cuenta_atras--;
+        if(cuenta_atras < 0) {
+            tiempo_agotado = true;
+            alert("Lo siento, se ha agotado el tiempo");
+            //para el timer:
+            clearTimeout(timer);
+        }
+        if(cuenta_atras >= 0) {
+            $("#contador").html(cuenta_atras);
+        }
+    }
+
+    var timer = setInterval(decrementar_cuenta, 1000);
+
+</script>
+
+</body>
+</html>
